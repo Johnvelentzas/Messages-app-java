@@ -8,6 +8,9 @@ public class client {
         client.run();
     }
 
+    private static final int SERVER_PORT = 80;
+    private static final String SERVER_IP_ADRESS = "46.190.31.245";
+
     private Socket socket;
     private DataInputStream dis;
     private DataOutputStream dos;
@@ -16,7 +19,7 @@ public class client {
 
     public client(){
         try {
-            this.socket = new Socket("192.168.1.14", 6666);
+            this.socket = new Socket(SERVER_IP_ADRESS, SERVER_PORT);
             this.dis = new DataInputStream(this.socket.getInputStream());
             this.dos = new DataOutputStream(this.socket.getOutputStream());
             this.establishedConnection = true;
@@ -61,7 +64,7 @@ public class client {
             this.socket.close();
             System.out.println("Client closed succesfully!");
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            System.exit(-1);
             e.printStackTrace();
         }
     }

@@ -9,7 +9,7 @@ public class server{
         server.run();
     }
 
-    private static final int SERVER_PORT = 6666;
+    private static final int SERVER_PORT = 80;
 
     private ServerSocket server;
     private ArrayList<serverClient> clients = new ArrayList<>();
