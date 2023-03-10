@@ -1,6 +1,6 @@
 import java.io.*;
 import java.net.*;
-//import java.util.ArrayList;
+
 import java.util.ArrayList;
 
 public class server{
@@ -13,8 +13,6 @@ public class server{
 
     private ServerSocket server;
     private ArrayList<serverClient> clients = new ArrayList<>();
-
-    //private ArrayList<String[]> messages = new ArrayList<>();
 
     public server(){
         try {
