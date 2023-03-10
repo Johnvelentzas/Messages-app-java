@@ -32,6 +32,7 @@ public class serverClient extends Thread{
             while (establishedConnection) {
             System.out.println("Waiting for Client: " + this.inetAddress);
             str = this.dis.readUTF();
+            System.out.println("Server received: " + str + " from Client: " + this.inetAddress);
             if (str == "close") {
                 this.close();
             }

@@ -21,7 +21,6 @@ public class server{
             this.server = new ServerSocket(SERVER_PORT);
             System.out.println("Server Created Succesfully!");
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -31,7 +30,6 @@ public class server{
         try {
             while (true) {
                 client = new serverClient(this.server.accept());
-                System.out.println("Established connection with: " + client.getInetAddress());
                 this.clients.add(client);
                 client.start();
             }
@@ -53,7 +51,7 @@ public class server{
             this.server.close();
             System.out.println("Server closed succesfully!");
         } catch (IOException e) {
-            // TODO Auto-generated catch block
+            System.exit(-1);
             e.printStackTrace();
         }
     }
