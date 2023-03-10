@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 //import java.util.ArrayList;
+import java.util.ArrayList;
 
 public class server{
     public static void main(String[] args) {
@@ -8,24 +9,17 @@ public class server{
         server.run();
     }
 
-    private ServerSocket server;
-    private Socket socket;
-    private DataInputStream dis;
-    private DataOutputStream dos;
+    private static final int SERVER_PORT = 6666;
 
-    private boolean establishedConnection = false;
+    private ServerSocket server;
+    private ArrayList<serverClient> clients = new ArrayList<>();
 
     //private ArrayList<String[]> messages = new ArrayList<>();
 
     public server(){
         try {
-            this.server = new ServerSocket(6666);
+            this.server = new ServerSocket(SERVER_PORT);
             System.out.println("Server Created Succesfully!");
-            this.socket = this.server.accept();
-            this.dis = new DataInputStream(this.socket.getInputStream());
-            this.dos = new DataOutputStream(this.socket.getOutputStream());
-            this.establishedConnection = true;
-            System.out.println("Established connection with: " + this.socket.getInetAddress());
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -33,32 +27,30 @@ public class server{
     }
 
     public void run(){
-        String str;
+        serverClient client;
         try {
-            while (this.establishedConnection) {
-                System.out.println("Waiting to read.");
-                str = this.dis.readUTF();
-                System.out.println("Read : " + str);
-                if (str == "close") {
-                    this.close();
-                    break;
-                }
-                //messages.add(str.split("\n"));
-                this.dos.writeUTF("Read message: " + str);
+            while (true) {
+                client = new serverClient(this.server.accept());
+                System.out.println("Established connection with: " + client.getInetAddress());
+                this.clients.add(client);
+                client.start();
             }
         } catch (IOException e) {
-            this.establishedConnection = false;
             this.close();
         }
     }
 
+    public static synchronized String message(String str){
+        return "test";
+    }
+
     public void close(){
         try {
-            this.establishedConnection = false;
-            this.dis.close();
-            this.dos.close();
+            for (serverClient client : this.clients) {
+                client.close();
+            }
+            this.clients.clear();
             this.server.close();
-            this.socket.close();
             System.out.println("Server closed succesfully!");
         } catch (IOException e) {
             // TODO Auto-generated catch block
