@@ -32,6 +32,9 @@ public class serverClient extends Thread{
             while (establishedConnection) {
             System.out.println("Waiting for Client: " + this.inetAddress);
             str = this.dis.readUTF();
+            if (str == "close") {
+                this.close();
+            }
             str = server.message(str);
             this.dos.writeUTF(str);
         }
@@ -43,6 +46,7 @@ public class serverClient extends Thread{
 
     public void close(){
         try {
+            this.establishedConnection = false;
             this.dis.close();
             this.dos.close();
             this.client.close();
