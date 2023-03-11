@@ -56,6 +56,9 @@ public class serverClient extends Thread{
     }
 
     private String process(String in){
+        if (in == "help") {
+            return HELP;
+        }
         switch (this.state) {
             case await:
                 switch (in.substring(0, 3)) {
@@ -171,4 +174,6 @@ public class serverClient extends Thread{
     public String getClientName(){
         return this.clientName;
     }
+
+    private static final String HELP = "help,   //Returns a text with all the available commands.\ngreet,  //The begining state of the server. Expects a client name.\nawait,  //The default state of the server. When it is on await it expects to receive an SAP code.\nok,     //A signal given by the server to proceed with the request.\nprc,    //Proceed with the client request.\nbdr,    //Bad Request.\ncun,    //Change User Name.\notl,    //Open text log. Optional parameters <+int>, <-int>, 0(default). ex. \"otl:-10\" the client will receive the 10 last lines of the log file if they exist. Follows the directory of the text file if given the ok by the server.\natl,    //Add to Text Log.\nrtl,    //Remove from Text Log. Follows void.\nstl,    //Store Text Log. Follows void.\nctl,    //Create Text Log. Follows void.\nmun,    //Message User with Name. Mandatory parameter <String> the user name of the message recepient. Follows the message of the user.\nocu,    //Open Conversation with User. Mandatory parameter <String> the user name of the message recepient. Follows void.\nmoc,    //Message Open Conversation. Follows the message of the user.\nuoc,    //Update Open Conversation. Follows void.";
 }

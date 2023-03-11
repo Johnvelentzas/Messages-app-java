@@ -29,10 +29,8 @@ public class client {
             this.establishedConnection = true;
             System.out.println("Established connection!");
         } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
