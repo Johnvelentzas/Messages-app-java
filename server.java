@@ -9,7 +9,8 @@ public class server{
         server.run();
     }
 
-    private static final int SERVER_PORT = 80;
+    public static final int SERVER_PORT = 80;
+    public static final String FILE_PATH = "files\\";
 
     private ServerSocket server;
     private ArrayList<serverClient> clients = new ArrayList<>();
