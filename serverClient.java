@@ -39,24 +39,19 @@ public class serverClient extends Thread{
         String str;
         try {
             while (establishedConnection) {
-            System.out.println("Waiting for Client: " + this.clientName);
             str = this.dis.readUTF();
             System.out.println("Server received: " + str + " from Client: " + this.clientName);
-            if (str == "close") {
-                this.close();
-            }
             str = this.process(str);
-            System.out.println("Server client state is: " + this.state);
             this.dos.writeUTF(str);
         }
         } catch (Exception e) {
-            System.out.println("Connection with Client:" + this.clientName + " failed.");
+            System.out.println("Connection with Client:" + this.clientName + " was terminated.");
             this.close();
         }
     }
 
     private String process(String in){
-        if (in == "help") {
+        if (in.equals("help")) {
             return HELP;
         }
         switch (this.state) {

@@ -13,13 +13,14 @@ public class client {
 
     private static final Boolean WAITING_FOR_CODE = true;
     private static final Boolean WAITING_FOR_CONTEXT = false;
+    private static final String GREET_MESSAGE = "Hello Server!";
 
     private Socket socket;
     private DataInputStream dis;
     private DataOutputStream dos;
 
     private boolean establishedConnection = false;
-    private boolean clientState = WAITING_FOR_CODE;
+    private boolean clientState = WAITING_FOR_CONTEXT;
 
     public client(){
         try {
@@ -39,12 +40,14 @@ public class client {
         String str;
         Scanner scanner = new Scanner(System.in);
         try {
+            this.dos.writeUTF(GREET_MESSAGE);
+            str = this.dis.readUTF();
             while (this.establishedConnection) {
                 if (this.clientState) {
                     System.out.println("Give a SAP code to the server: (help) to get a list of all available codes. (close) to close the connection.");
                 }
                 str = scanner.nextLine();
-                if (str == "close") {
+                if (str.equals("close")) {
                     scanner.close();
                     this.close();
                     break;
