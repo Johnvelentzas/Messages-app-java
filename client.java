@@ -11,11 +11,15 @@ public class client {
     private static final int SERVER_PORT = 80;
     private static final String SERVER_IP_ADRESS = "46.190.31.245";
 
+    private static final Boolean WAITING_FOR_CODE = true;
+    private static final Boolean WAITING_FOR_CONTEXT = false;
+
     private Socket socket;
     private DataInputStream dis;
     private DataOutputStream dos;
 
     private boolean establishedConnection = false;
+    private boolean clientState = WAITING_FOR_CODE;
 
     public client(){
         try {
@@ -38,7 +42,9 @@ public class client {
         Scanner scanner = new Scanner(System.in);
         try {
             while (this.establishedConnection) {
-                System.out.println("Write a message to the server:");
+                if (this.clientState) {
+                    System.out.println("Give a SAP code to the server: (help) to get a list of all available codes. (close) to close the connection.");
+                }
                 str = scanner.nextLine();
                 if (str == "close") {
                     scanner.close();
@@ -47,7 +53,28 @@ public class client {
                 }
                 this.dos.writeUTF(str);
                 str = this.dis.readUTF();
-                System.out.println("The server sent: " + str);
+                switch (str) {
+                    case "ok":
+                        System.out.println("Request executed Sucessfully.");
+                        this.clientState = WAITING_FOR_CODE;
+                        break;
+                    case "bdr":
+                        System.out.println("Bad request.");
+                        this.clientState = WAITING_FOR_CODE;
+                        break;
+                    case "prc":
+                        System.out.println("Proceed with request:");
+                        this.clientState = WAITING_FOR_CONTEXT;
+                        break;
+                    case "cun":
+                        System.out.println("Change user name:");
+                        this.clientState = WAITING_FOR_CONTEXT;
+                        break;
+                    default:
+                        System.out.println("The server sent:\n" + str);
+                        this.clientState = WAITING_FOR_CODE;
+                        break;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

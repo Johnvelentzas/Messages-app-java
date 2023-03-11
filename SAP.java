@@ -4,6 +4,7 @@
  */
 public enum SAP {
     
+    help,   //Returns a text with all the available commands.
     greet,  //The begining state of the server. Expects a client name.
     await,  //The default state of the server. When it is on await it expects to receive an SAP code.
     ok,     //A signal given by the server to proceed with the request.
