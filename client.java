@@ -43,17 +43,6 @@ public class client {
             this.dos.writeUTF(GREET_MESSAGE);
             str = this.dis.readUTF();
             while (this.establishedConnection) {
-                if (this.clientState) {
-                    System.out.println("Give a SAP code to the server: (help) to get a list of all available codes. (close) to close the connection.");
-                }
-                str = scanner.nextLine();
-                if (str.equals("close")) {
-                    scanner.close();
-                    this.close();
-                    break;
-                }
-                this.dos.writeUTF(str);
-                str = this.dis.readUTF();
                 switch (str) {
                     case "ok":
                         System.out.println("Request executed Sucessfully.");
@@ -76,6 +65,17 @@ public class client {
                         this.clientState = WAITING_FOR_CODE;
                         break;
                 }
+                if (this.clientState) {
+                    System.out.println("Give a SAP code to the server: (help) to get a list of all available codes. (close) to close the connection.");
+                }
+                str = scanner.nextLine();
+                if (str.equals("close")) {
+                    scanner.close();
+                    this.close();
+                    break;
+                }
+                this.dos.writeUTF(str);
+                str = this.dis.readUTF();
             }
         } catch (IOException e) {
             e.printStackTrace();

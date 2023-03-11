@@ -56,6 +56,9 @@ public class serverClient extends Thread{
         }
         switch (this.state) {
             case await:
+                if (in.length() < 3) {
+                    return "bdr";
+                }
                 switch (in.substring(0, 3)) {
                     case "cun":
                         this.state = SAP.cun;
