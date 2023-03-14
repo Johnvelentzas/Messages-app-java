@@ -1,6 +1,6 @@
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
+import java.util.ArrayList;
 
 public class serverClient extends Thread{
     
@@ -18,7 +18,8 @@ public class serverClient extends Thread{
     private String stringParam = "";
 
     private File file;
-    private Scanner scanner;
+    private ArrayList<String> fileData = new ArrayList<>();
+    private ArrayList<String> transmitData = new ArrayList<>();
 
     public serverClient(Socket socket){
         this.client = socket;
@@ -43,6 +44,10 @@ public class serverClient extends Thread{
             System.out.println("Server received: " + str + " from Client: " + this.clientName);
             str = this.process(str);
             this.dos.writeUTF(str);
+            if (this.state == SAP.ssd) {
+                sendServerData();
+                this.state = SAP.await;
+            }
         }
         } catch (Exception e) {
             System.out.println("Connection with Client:" + this.clientName + " was terminated.");
@@ -67,14 +72,22 @@ public class serverClient extends Thread{
                         this.state = SAP.otl;
                         this.getIntParam(in);
                         return "prc";
+                    case "utl":
+                        this.state = SAP.utl;
+                        this.getIntParam(in);
+                        return "prc";
                     case "atl":
                         this.state = SAP.atl;
                         return "prc";
                     case "rtl":
                         this.state = SAP.rtl;
+                        this.getIntParam(in);
                         return "prc";
                     case "stl":
                         this.state = SAP.stl;
+                        return "prc";
+                    case "etl":
+                        this.state = SAP.etl;
                         return "prc";
                     case "ctl":
                         this.state = SAP.ctl;
@@ -104,38 +117,120 @@ public class serverClient extends Thread{
                 this.state = SAP.await;
                 return "ok";
             case otl:
-                this.state = SAP.await;
-                return "ok";
+                return this.otl(in);
+            case utl:
+                return this.utl(in);
             case atl:
-                this.state = SAP.await;
-                return "ok";
+                return this.atl(in);
             case rtl:
-                this.state = SAP.await;
-                return "ok";
+                return this.rtl(in);
             case stl:
-                this.state = SAP.await;
-                return "ok";
+                return this.stl(in);
+            case etl:
+                return this.etl(in);
             case ctl:
-                this.state = SAP.await;
-                return "ok";
+                return this.ctl(in);
             case mun:
-                this.state = SAP.await;
-                return "ok";
+                return this.mun(in);
             case ocu:
-                this.state = SAP.await;
-                return "ok";
+                return this.ocu(in);
             case moc:
-                this.state = SAP.await;
-                return "ok";
+                return this.moc(in);
             case uoc:
-                this.state = SAP.await;
-                return "ok";
+                return this.uoc(in);
             default:
                 return "bdr";
         }
     }
 
+    private String otl(String in){
+        this.file = new File(server.FILE_PATH + in);
+        if (this.file.exists()) {
+            this.fileData = server.openFile(this.file);
+            moveDataToTransmit(this.intParam);
+            this.state = SAP.ssd;
+            return "ssd";
+        }
+        return "bdr";
+    }
+
+    private String utl(String in){
+        if (this.file != null && this.file.exists()) {
+            this.fileData = server.openFile(this.file);
+            moveDataToTransmit(this.intParam);
+            this.state = SAP.ssd;
+            return "ssd";
+        }
+        return "bdr";
+    }
+
+    private String atl(String in){
+        if (this.intParam == 0) {
+            this.fileData.add(in);
+        } else if(this.intParam > 0){
+            this.fileData.add(this.intParam, in);
+        }else{
+            this.fileData.add(this.fileData.size() + this.intParam - 1, in);
+        }
+        return "ok";
+    }
+
+    private String rtl(String in){
+        if (this.intParam == 0) {
+            this.fileData.remove(this.fileData.size() - 1);
+        }else if(this.intParam > 0){
+            this.fileData.remove(this.intParam);
+        }else{
+            this.fileData.remove(this.fileData.size() + this.intParam - 1);
+        }
+        return "ok";
+    }
+
+    private String stl(String in){
+        if(server.acessWriteFile(this.file, this.fileData)){
+            return "ok";
+        }
+        return "bdr";
+    }
+
+    private String etl(String in){
+        this.fileData.clear();
+        this.file = null;
+        return "ok";
+    }
+
+    private String ctl(String in){
+        if(server.createFile(in)){
+            return "ok";
+        }
+        return "bdr";
+    }
+
+    private String mun(String in){
+        if (this.file != null) {
+            return "bdr";
+        }
+        
+        return "bdr";
+    }
+
+    private String ocu(String in){
+        return "bdr";
+    }
+
+    private String moc(String in){
+        return "bdr";
+    }
+
+    private String uoc(String in){
+        return "bdr";
+    }
+
     private void getIntParam(String str){
+        if (str.length() < 5) {
+            this.intParam = 0;
+            return;
+        }
         if (str.charAt(3) == ':') {
             this.intParam = Integer.parseInt(str.substring(4));
         }else{
@@ -144,6 +239,10 @@ public class serverClient extends Thread{
     }
 
     private void getStringParam(String str){
+        if (str.length() < 5) {
+            this.stringParam = "";
+            return;
+        }
         if (str.charAt(3) == ':') {
             this.stringParam = str.substring(4);
         }else{
@@ -171,6 +270,29 @@ public class serverClient extends Thread{
 
     public String getClientName(){
         return this.clientName;
+    }
+
+    private void moveDataToTransmit(int param){
+        if (param == 0) {
+            this.transmitData = this.fileData;
+        }else if (param < 0) {
+            this.transmitData.clear();
+            for (int i = this.fileData.size() + param; i < this.fileData.size(); i++) {
+                this.transmitData.add(this.fileData.get(i));
+            }
+        }else{
+            this.transmitData.clear();
+            for (int i = 0; i < param; i++) {
+                this.transmitData.add(this.fileData.get(i));
+            }
+        }
+    }
+
+    private void sendServerData() throws IOException{
+        this.dos.writeInt(this.transmitData.size());
+        for (int i = 0; i < this.transmitData.size(); i++) {
+            this.dos.writeUTF(this.transmitData.get(i));
+        }
     }
 
     private static final String HELP = "help,   //Returns a text with all the available commands.\ngreet,  //The begining state of the server. Expects a client name.\nawait,  //The default state of the server. When it is on await it expects to receive an SAP code.\nok,     //A signal given by the server to proceed with the request.\nprc,    //Proceed with the client request.\nbdr,    //Bad Request.\ncun,    //Change User Name.\notl,    //Open text log. Optional parameters <+int>, <-int>, 0(default). ex. \"otl:-10\" the client will receive the 10 last lines of the log file if they exist. Follows the directory of the text file if given the ok by the server.\natl,    //Add to Text Log.\nrtl,    //Remove from Text Log. Follows void.\nstl,    //Store Text Log. Follows void.\nctl,    //Create Text Log. Follows void.\nmun,    //Message User with Name. Mandatory parameter <String> the user name of the message recepient. Follows the message of the user.\nocu,    //Open Conversation with User. Mandatory parameter <String> the user name of the message recepient. Follows void.\nmoc,    //Message Open Conversation. Follows the message of the user.\nuoc,    //Update Open Conversation. Follows void.";

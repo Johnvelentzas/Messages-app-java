@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class client {
@@ -9,7 +10,7 @@ public class client {
     }
 
     private static final int SERVER_PORT = 80;
-    private static final String SERVER_IP_ADRESS = "46.190.31.245";
+    private static final String SERVER_IP_ADRESS = "172.20.10.5";
 
     private static final Boolean WAITING_FOR_CODE = true;
     private static final Boolean WAITING_FOR_CONTEXT = false;
@@ -21,6 +22,8 @@ public class client {
 
     private boolean establishedConnection = false;
     private boolean clientState = WAITING_FOR_CONTEXT;
+
+    private ArrayList<String> data = new ArrayList<>();
 
     public client(){
         try {
@@ -60,6 +63,12 @@ public class client {
                         System.out.println("Change user name:");
                         this.clientState = WAITING_FOR_CONTEXT;
                         break;
+                    case "ssd":
+                        System.out.println("Receiving data from server.");
+                        this.clientState = WAITING_FOR_CODE;
+                        receiveServerData();
+                        System.out.println(this.data.toString());
+                        break;
                     default:
                         System.out.println("The server sent:\n" + str);
                         this.clientState = WAITING_FOR_CODE;
@@ -94,6 +103,14 @@ public class client {
         } catch (IOException e) {
             System.exit(-1);
             e.printStackTrace();
+        }
+    }
+
+    private void receiveServerData() throws IOException{
+        int max = this.dis.readInt();
+        this.data = new ArrayList<>();
+        for (int i = 0; i < max; i++) {
+            this.data.add(this.dis.readUTF());
         }
     }
 }
