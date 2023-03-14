@@ -56,7 +56,7 @@ public class server{
     }
 
     public static synchronized boolean createFile(String fileName){
-        File file = new File(FILE_PATH + fileName);
+        File file = new File(FILE_PATH + fileName + ".txt");
         boolean temp = false;
         try {
             temp = file.createNewFile();
@@ -78,8 +78,8 @@ public class server{
         return data;
     }
 
-    public static boolean acessWriteFile(File file, ArrayList<String> fileData){
-        if (tryAccessFile(file)) {
+    public static boolean accessWriteFile(File file, ArrayList<String> fileData){
+        if (accessFile(file)) {
             writeFile(file, fileData);
             openAccessFile(file);
             return true;
@@ -101,7 +101,7 @@ public class server{
     }
 
     public static boolean accessAppendFile(File file, String str){
-            if (tryAccessFile(file)) {
+            if (accessFile(file)) {
             appendFile(file, str);
             openAccessFile(file);
             return true;
@@ -150,7 +150,7 @@ public class server{
             return false;
         }
     }
-*/
+
 
     private static boolean tryAccessFile(File file){
         Object foo = new Object();
@@ -169,6 +169,7 @@ public class server{
             }
         }
     }
+*/
 
     private static synchronized boolean accessFile(File file){
         if (files.get(file.getName())) {

@@ -43,6 +43,7 @@ public class serverClient extends Thread{
             str = this.dis.readUTF();
             System.out.println("Server received: " + str + " from Client: " + this.clientName);
             str = this.process(str);
+            System.out.println("Server client state:" + this.state + ", sending: " + str);
             this.dos.writeUTF(str);
             if (this.state == SAP.ssd) {
                 sendServerData();
@@ -80,15 +81,12 @@ public class serverClient extends Thread{
                         this.state = SAP.atl;
                         return "prc";
                     case "rtl":
-                        this.state = SAP.rtl;
                         this.getIntParam(in);
-                        return "prc";
+                        return this.rtl();
                     case "stl":
-                        this.state = SAP.stl;
-                        return "prc";
+                        return this.stl();
                     case "etl":
-                        this.state = SAP.etl;
-                        return "prc";
+                        return this.etl();
                     case "ctl":
                         this.state = SAP.ctl;
                         return "prc";
@@ -122,12 +120,6 @@ public class serverClient extends Thread{
                 return this.utl(in);
             case atl:
                 return this.atl(in);
-            case rtl:
-                return this.rtl(in);
-            case stl:
-                return this.stl(in);
-            case etl:
-                return this.etl(in);
             case ctl:
                 return this.ctl(in);
             case mun:
@@ -144,13 +136,14 @@ public class serverClient extends Thread{
     }
 
     private String otl(String in){
-        this.file = new File(server.FILE_PATH + in);
+        this.file = new File(server.FILE_PATH + in + ".txt");
         if (this.file.exists()) {
             this.fileData = server.openFile(this.file);
             moveDataToTransmit(this.intParam);
             this.state = SAP.ssd;
             return "ssd";
         }
+        this.state = SAP.await;
         return "bdr";
     }
 
@@ -161,6 +154,7 @@ public class serverClient extends Thread{
             this.state = SAP.ssd;
             return "ssd";
         }
+        this.state = SAP.await;
         return "bdr";
     }
 
@@ -172,10 +166,11 @@ public class serverClient extends Thread{
         }else{
             this.fileData.add(this.fileData.size() + this.intParam - 1, in);
         }
+        this.state = SAP.await;
         return "ok";
     }
 
-    private String rtl(String in){
+    private String rtl(){
         if (this.intParam == 0) {
             this.fileData.remove(this.fileData.size() - 1);
         }else if(this.intParam > 0){
@@ -183,23 +178,27 @@ public class serverClient extends Thread{
         }else{
             this.fileData.remove(this.fileData.size() + this.intParam - 1);
         }
+        this.state = SAP.await;
         return "ok";
     }
 
-    private String stl(String in){
-        if(server.acessWriteFile(this.file, this.fileData)){
+    private String stl(){
+        this.state = SAP.await;
+        if(server.accessWriteFile(this.file, this.fileData)){
             return "ok";
         }
         return "bdr";
     }
 
-    private String etl(String in){
+    private String etl(){
         this.fileData.clear();
         this.file = null;
+        this.state = SAP.await;
         return "ok";
     }
 
     private String ctl(String in){
+        this.state = SAP.await;
         if(server.createFile(in)){
             return "ok";
         }
@@ -207,6 +206,7 @@ public class serverClient extends Thread{
     }
 
     private String mun(String in){
+        this.state = SAP.await;
         if (this.file != null) {
             return "bdr";
         }
@@ -215,14 +215,17 @@ public class serverClient extends Thread{
     }
 
     private String ocu(String in){
+        this.state = SAP.await;
         return "bdr";
     }
 
     private String moc(String in){
+        this.state = SAP.await;
         return "bdr";
     }
 
     private String uoc(String in){
+        this.state = SAP.await;
         return "bdr";
     }
 
