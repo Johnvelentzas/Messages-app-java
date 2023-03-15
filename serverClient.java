@@ -74,11 +74,11 @@ public class serverClient extends Thread{
                         this.getIntParam(in);
                         return "prc";
                     case "utl":
-                        this.state = SAP.utl;
                         this.getIntParam(in);
-                        return "prc";
+                        return this.utl(in);
                     case "atl":
                         this.state = SAP.atl;
+                        this.getIntParam(in);
                         return "prc";
                     case "rtl":
                         this.getIntParam(in);
@@ -116,8 +116,6 @@ public class serverClient extends Thread{
                 return "ok";
             case otl:
                 return this.otl(in);
-            case utl:
-                return this.utl(in);
             case atl:
                 return this.atl(in);
             case ctl:
@@ -159,14 +157,16 @@ public class serverClient extends Thread{
     }
 
     private String atl(String in){
+        System.out.println("Adding: " + in);
         if (this.intParam == 0) {
-            this.fileData.add(in);
+            this.fileData.add(in + "\n");
         } else if(this.intParam > 0){
-            this.fileData.add(this.intParam, in);
+            this.fileData.add(this.intParam - 1, in + "\n");
         }else{
-            this.fileData.add(this.fileData.size() + this.intParam - 1, in);
+            this.fileData.add(this.fileData.size() + this.intParam - 1, in + "\n");
         }
         this.state = SAP.await;
+        System.out.println("File data: " + this.fileData.toString());
         return "ok";
     }
 
@@ -174,17 +174,18 @@ public class serverClient extends Thread{
         if (this.intParam == 0) {
             this.fileData.remove(this.fileData.size() - 1);
         }else if(this.intParam > 0){
-            this.fileData.remove(this.intParam);
+            this.fileData.remove(this.intParam - 1);
         }else{
             this.fileData.remove(this.fileData.size() + this.intParam - 1);
         }
         this.state = SAP.await;
+        System.out.println("File data: " + this.fileData.toString());
         return "ok";
     }
 
     private String stl(){
         this.state = SAP.await;
-        if(server.accessWriteFile(this.file, this.fileData)){
+        if(server.writeFile(this.file, this.fileData)){
             return "ok";
         }
         return "bdr";

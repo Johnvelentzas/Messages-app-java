@@ -87,11 +87,11 @@ public class server{
         return false;
     }
 
-    private static boolean writeFile(File file, ArrayList<String> fileData){
+    public static synchronized boolean writeFile(File file, ArrayList<String> fileData){
         try {
             FileWriter writer = new FileWriter(file);
             for (int i = 0; i < fileData.size(); i++) {
-                writer.write(fileData.get(0));
+                writer.write(fileData.get(i));
             }
             writer.close();
             return true;

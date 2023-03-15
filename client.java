@@ -10,7 +10,7 @@ public class client {
     }
 
     private static final int SERVER_PORT = 80;
-    private static final String SERVER_IP_ADRESS = "192.168.1.6";
+    private static final String SERVER_IP_ADRESS = "10.26.50.67";
 
     private static final Boolean WAITING_FOR_CODE = true;
     private static final Boolean WAITING_FOR_CONTEXT = false;
